@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Paper Animation - Yazını Oluştur</title>
+<style>
+  body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background: #fef7e4;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    color: #5a3e00;
+  }
+
+  #inputContainer {
+    margin-bottom: 20px;
+    width: 90%;
+    max-width: 400px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    font-size: 1.3rem;
+    padding: 0.6rem 1rem;
+    border: 2px solid #c9a74b;
+    border-radius: 10px;
+    box-shadow: 3px 3px 8px #c9a74b;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  button {
+    margin-top: 10px;
+    width: 100%;
+    font-size: 1.2rem;
+    padding: 0.7rem;
+    background-color: #c9a74b;
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #a88b3a;
+  }
+
+  .paper-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    max-width: 90vw;
+    justify-content: center;
+  }
+
+  .paper-letter {
+    background: #f4e1b6;
+    padding: 0.6rem 1rem;
+    border: 2px solid #c9a74b;
+    border-radius: 10px;
+    box-shadow: 4px 4px 8px rgba(0,0,0,0.3);
+    font-size: 3rem;
+    font-weight: bold;
+    color: #5a3e00;
+    opacity: 0;
+    transform-origin: center;
+    transform: translateY(20px) rotate(-12deg);
+    animation: floatJitter 1.6s ease forwards;
+  }
+
+  /* Delay animation for each letter */
+  .paper-letter:nth-child(1) { animation-delay: 0s; }
+  .paper-letter:nth-child(2) { animation-delay: 0.3s; }
+  .paper-letter:nth-child(3) { animation-delay: 0.6s; }
+  .paper-letter:nth-child(4) { animation-delay: 0.9s; }
+  .paper-letter:nth-child(5) { animation-delay: 1.2s; }
+  .paper-letter:nth-child(6) { animation-delay: 1.5s; }
+  .paper-letter:nth-child(7) { animation-delay: 1.8s; }
+  .paper-letter:nth-child(8) { animation-delay: 2.1s; }
+  .paper-letter:nth-child(9) { animation-delay: 2.4s; }
+  .paper-letter:nth-child(10) { animation-delay: 2.7s; }
+
+  @keyframes floatJitter {
+    0%, 100% {
+      opacity: 0;
+      transform: translateY(20px) rotate(-12deg);
+    }
+    25% {
+      opacity: 1;
+      transform: translateY(0) rotate(-10deg);
+    }
+    50% {
+      opacity: 1;
+      transform: translateY(5px) rotate(8deg);
+    }
+    75% {
+      opacity: 1;
+      transform: translateY(0) rotate(-5deg);
+    }
+  }
+
+  /* Örnek yazılar için butonlar */
+  #examples {
+    margin-top: 25px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  #examples button {
+    background-color: #f4e1b6;
+    color: #5a3e00;
+    font-weight: 700;
+    border: 2px solid #c9a74b;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #examples button:hover {
+    background-color: #c9a74b;
+    color: white;
+  }
+
+</style>
+</head>
+<body>
+  <h1>Paper Animation Yazı Oluşturucu</h1>
+
+  <div id="inputContainer">
+    <input type="text" id="userInput" placeholder="Yazını buraya yaz..." maxlength="10" />
+    <button id="createBtn">Animasyon Oluştur</button>
+  </div>
+
+  <div class="paper-container" id="paperContainer"></div>
+
+  <div id="examples">
+    <button data-text="MERHABA">MERHABA</button>
+    <button data-text="SELAM">SELAM</button>
+    <button data-text="EGE CAN">EGE CAN</button>
+    <button data-text="HOŞGELDİN">HOŞGELDİN</button>
+  </div>
+
+  <script>
+    const paperContainer = document.getElementById("paperContainer");
+    const userInput = document.getElementById("userInput");
+    const createBtn = document.getElementById("createBtn");
+    const exampleButtons = document.querySelectorAll("#examples button");
+
+    function createAnimation(text) {
+      paperContainer.innerHTML = ""; // Temizle
+      text = text.toUpperCase();
+
+      // Maksimum 10 karakter sınırlaması
+      if (text.length === 0) {
+        alert("Lütfen bir metin giriniz.");
+        return;
+      }
+      if (text.length > 10) {
+        alert("En fazla 10 karakter girebilirsiniz.");
+        return;
+      }
+
+      for (let i = 0; i < text.length; i++) {
+        const span = document.createElement("span");
+        span.textContent = text[i];
+        span.className = "paper-letter";
+        span.style.animationDelay = `${i * 0.3}s`;
+        paperContainer.appendChild(span);
+      }
+    }
+
+    createBtn.addEventListener("click", () => {
+      createAnimation(userInput.value);
+    });
+
+    // Örnek butonlara tıklanınca yazıyı animasyonla göster
+    exampleButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        userInput.value = btn.getAttribute("data-text");
+        createAnimation(userInput.value);
+      });
+    });
+
+    // Sayfa açıldığında örnek yazı gösterelim
+    createAnimation("EGE CAN");
+  </script>
+</body>
+</html>
