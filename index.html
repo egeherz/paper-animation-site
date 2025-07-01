@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ultra Modern Paper Text Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto+Mono&family=Playfair+Display&display=swap');
+  :root {
+    --clr-light-bg: #f9f9f9;
+    --clr-light-text: #222;
+    --clr-dark-bg: #121212;
+    --clr-dark-text: #eee;
+    --clr-accent: #f5c518;
+    --clr-overlay: rgba(0,0,0,0.6);
+    --font-main: 'Montserrat', sans-serif;
+    --font-mono: 'Roboto Mono', monospace;
+    --font-serif: 'Playfair Display', serif;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; padding: 25px;
+    background: var(--clr-light-bg);
+    color: var(--clr-light-text);
+    font-family: var(--font-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    transition: background-color 0.4s ease, color 0.4s ease;
+    user-select: none;
+  }
+  body.dark {
+    background: var(--clr-dark-bg);
+    color: var(--clr-dark-text);
+  }
+  h1 {
+    font-weight: 700;
+    font-size: 2.8rem;
+    margin-bottom: 1rem;
+    letter-spacing: 2px;
+    text-align: center;
+  }
+  #app {
+    max-width: 900px;
+    width: 90vw;
+    background: rgba(255 255 255 / 0.85);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    border-radius: 18px;
+    padding: 25px 30px 40px 30px;
+    position: relative;
+    transition: background 0.4s ease;
+  }
+  body.dark #app {
+    background: rgba(20 20 20 / 0.85);
+    box-shadow: 0 12px 30px rgba(245, 197, 24, 0.25);
+  }
+  #controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 25px;
+  }
+  input#inputText {
+    flex: 1 1 300px;
+    padding: 15px 20px;
+    font-size: 1.25rem;
+    border-radius: 14px;
+    border: 2px solid var(--clr-accent);
+    outline: none;
+    font-family: var(--font-serif);
+    color: inherit;
+    background: transparent;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  input#inputText:focus {
+    background: rgba(245,197,24,0.15);
+    border-color: #f5c518ee;
+  }
+  #charCount {
+    align-self: center;
+    font-weight: 700;
+    color: var(--clr-accent);
+    user-select: none;
+    min-width: 40px;
+    text-align: right;
+    font-family: var(--font-mono);
+  }
+  select#fontSelect {
+    padding: 12px 22px;
+    font-size: 1.15rem;
+    border-radius: 14px;
+    border: 2px solid var(--clr-accent);
+    cursor: pointer;
+    background: transparent;
+    color: inherit;
+    font-family: var(--font-serif);
+    transition: border-color 0.3s ease;
+  }
+  select#fontSelect:hover, select#fontSelect:focus {
+    border-color: #f5c518ee;
+    outline: none;
+  }
+  select#colorSelect {
+    padding: 12px 22px;
+    font-size: 1.15rem;
+    border-radius: 14px;
+    border: 2px solid var(--clr-accent);
+    cursor: pointer;
+    background: transparent;
+    color: inherit;
+    font-family: var(--font-serif);
+    transition: border-color 0.3s ease;
+  }
+  button {
+    flex: 1 1 140px;
+    background: var(--clr-accent);
+    color: var(--clr-dark-bg);
+    border: none;
+    border-radius: 14px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(245,197,24,0.6);
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  button:hover {
+    box-shadow: 0 12px 28px rgba(245,197,24,0.85);
+    background: #f5d934;
+  }
+  button:disabled {
+    background: #bbb;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  button svg {
+    width: 22px; height: 22px;
+    fill: var(--clr-dark-bg);
+  }
+  #previewWrapper {
+    position: relative;
+    max-width: 900px;
+    width: 100%;
+    aspect-ratio: 2 / 1;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 14px 30px rgba(0,0,0,0.15);
+    background: var(--clr-light-bg);
+    transition: background-color 0.4s ease;
+  }
+  body.dark #previewWrapper {
+    background: var(--clr-dark-bg);
+  }
+  #backgroundTextLayer {
+    position: absolute;
+    inset: 0;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 13px;
+    color: #999;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    user-select: none;
+    filter: blur(1.3px);
+    opacity: 0.15;
+    padding: 20px 25px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 7px;
+  }
+  body.dark #backgroundTextLayer {
+    color: #666;
+    opacity: 0.11;
+  }
+  #backgroundTextLayer span {
+    user-select: none;
+  }
+  #mainTextLayer {
+    position: absolute;
+    inset: 0;
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 48px;
+    color: var(--clr-accent);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 30px;
+    text-align: center;
+    word-break: break-word;
+    user-select: text;
+  }
+  body.dark #mainTextLayer {
+    color: #f5c518ee;
+    text-shadow: 0 0 10px #f5c518bb;
+  }
+  #toggleTheme {
+    margin-top: 25px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--clr-accent);
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: color 0.4s ease;
+  }
+  #toggleTheme:hover {
+    color: #fff700;
+  }
+  #toggleTheme svg {
+    width: 24px; height: 24px;
+    fill: var(--clr-accent);
+    transition: fill 0.4s ease;
+  }
+  body.dark #toggleTheme svg {
+    fill: var(--clr-accent);
+  }
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--clr-overlay);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: white;
+    font-size: 2.8rem;
+    letter-spacing: 0.1em;
+    user-select: none;
+    z-index: 9999;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  #overlay.visible {
+    visibility: visible;
+    opacity: 1;
+  }
+  #overlay small {
+    font-weight: 400;
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+    letter-spacing: normal;
+    color: #f5c518cc;
+  }
+  @media (max-width: 600px) {
+    h1 {
+      font-size: 2rem;
+    }
+    #controls {
+      flex-direction: column;
+    }
+    input#inputText, select#fontSelect, select#colorSelect, button {
+      flex: 1 1 100%;
+    }
+    #mainTextLayer {
+      font-size: 28px;
+      padding: 0 15px;
+    }
+    #backgroundTextLayer {
+      font-size: 9px;
+      padding: 15px 20px;
+      gap: 5px;
+    }
+  }
+</style>
+</head>
+<body>
+<h1>Ultra Modern Paper Text Generator</h1>
+<div id="app">
+  <div id="controls" role="region" aria-label="Controls">
+    <input id="inputText" maxlength="100" placeholder="Enter your text (max 100 chars)" aria-label="Input text" value="PlayerUnknown's Battlegrounds">
+    <div id="charCount" aria-live="polite" aria-atomic="true">27</div>
+    <select id="fontSelect" aria-label="Choose font">
+      <option value="Playfair Display" style="font-family:'Playfair Display', serif;">Playfair Display</option>
+      <option value="Montserrat" style="font-family:'Montserrat', sans-serif;">Montserrat</option>
+      <option value="Roboto Mono" style="font-family:'Roboto Mono', monospace;">Roboto Mono</option>
+      <option value="Courier New" style="font-family:'Courier New', monospace;">Courier New</option>
+    </select>
+    <select id="colorSelect" aria-label="Choose text color">
+      <option value="#f5c518" style="color:#f5c518;">Yellow</option>
+      <option value="#e94560" style="color:#e94560;">Red</option>
+      <option value="#3f72af" style="color:#3f72af;">Blue</option>
+      <option value="#2a9d8f" style="color:#2a9d8f;">Teal</option>
+      <option value="#222" style="color:#222;">Black</option>
+      <option value="#eee" style="color:#eee;">White</option>
+    </select>
+    <button id="createBtn" aria-label="Create text image">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Create
+    </button>
+    <button id="downloadPngBtn" aria-label="Download PNG" disabled>
+      <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4l2-3 2 3h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2z"/></svg>
+      Download PNG
+    </button>
+    <button id="downloadMp4Btn" aria-label="Download MP4" disabled>
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      Download MP4
+    </button>
+  </div>
+  <div id="previewWrapper" role="img" aria-label="Text preview">
+    <div id="backgroundTextLayer" aria-hidden="true"></div>
+    <div id="mainTextLayer" aria-live="polite" aria-atomic="true"></div>
+  </div>
+</div>
+<div id="toggleTheme" role="button" tabindex="0" aria-pressed="false" aria-label="Toggle dark or light theme">
+  <svg viewBox="0 0 24 24" id="themeIcon"><circle cx="12" cy="12" r="5"/></svg>
+  Switch Theme
+</div>
+<div id="overlay" aria-live="assertive" aria-atomic="true"></div>
+
+<script>
+(() => {
+  const inputText = document.getElementById('inputText');
+  const charCount = document.getElementById('charCount');
+  const fontSelect = document.getElementById('fontSelect');
+  const colorSelect = document.getElementById('colorSelect');
+  const createBtn = document.getElementById('createBtn');
+  const downloadPngBtn = document.getElementById('downloadPngBtn');
+  const downloadMp4Btn = document.getElementById('downloadMp4Btn');
+  const mainTextLayer = document.getElementById('mainTextLayer');
+  const backgroundTextLayer = document.getElementById('backgroundTextLayer');
+  const overlay = document.getElementById('overlay');
+  const previewWrapper = document.getElementById('previewWrapper');
+  const toggleTheme = document.getElementById('toggleTheme');
+  const themeIcon = document.getElementById('themeIcon');
+
+  const blurTexts = [
+    "Breaking news: economy is shifting rapidly.",
+    "Scientists discover new particle at CERN.",
+    "Global markets respond to political changes.",
+    "Technology trends shape the future of work.",
+    "Climate change effects worsen globally.",
+    "Health experts advise new diet guidelines.",
+    "SpaceX plans new Mars missions by 2028.",
+    "AI advancements raise ethical concerns.",
+    "Sports highlights: championship results in.",
+    "Cultural festivals attract millions worldwide.",
+    "Innovation hubs grow in emerging markets.",
+    "Environmental policies face challenges ahead.",
+    "Education reforms aim for inclusivity.",
+    "Renewable energy adoption increases worldwide.",
+    "Medical breakthroughs in cancer research.",
+    "Travel restrictions ease after pandemic.",
+    "Art exhibitions showcase modern creativity.",
+    "Social media impacts political discourse.",
+    "Urban planning transforms smart cities.",
+    "Cybersecurity threats on the rise."
+  ];
+
+  let darkMode = false;
+  let animationInterval;
+  let countdownInterval;
+
+  function updateCharCount() {
+    charCount.textContent = inputText.value.length;
+    if (inputText.value.length > 100) {
+      inputText.value = inputText.value.substring(0, 100);
+    }
+  }
+
+  function setBackgroundTexts() {
+    backgroundTextLayer.innerHTML = '';
+    // Fill background with blur texts randomly repeated
+    for(let i = 0; i < 20; i++) {
+      const span = document.createElement('span');
+      span.textContent = blurTexts[i];
+      backgroundTextLayer.appendChild(span);
+    }
+  }
+
+  function updateMainText() {
+    mainTextLayer.textContent = inputText.value.trim() || "Your Text Here";
+    mainTextLayer.style.fontFamily = fontSelect.value;
+    mainTextLayer.style.color = colorSelect.value;
+  }
+
+  function toggleThemeMode() {
+    darkMode = !darkMode;
+    document.body.classList.toggle('dark');
+    toggleTheme.setAttribute('aria-pressed', darkMode.toString());
+    themeIcon.innerHTML = darkMode
+      ? '<path d="M21 12.79A9 9 0 0112.21 3 7 7 0 1012 21a9 9 0 009-8.21z"/>'
+      : '<circle cx="12" cy="12" r="5"/>';
+  }
+
+  function showOverlay(message, subMessage) {
+    overlay.innerHTML = `${message}<br><small>${subMessage || ''}</small>`;
+    overlay.classList.add('visible');
+  }
+
+  function hideOverlay() {
+    overlay.classList.remove('visible');
+  }
+
+  async function createAnimation(duration) {
+    let remaining = duration;
+    showOverlay(`Creating in... <span id="countdown">${Math.ceil(duration/1000)}</span>`, 'Please wait');
+    countdownInterval = setInterval(() => {
+      remaining -= 1000;
+      const countdownEl = document.getElementById('countdown');
+      if(countdownEl) countdownEl.textContent = Math.max(0, Math.ceil(remaining / 1000));
+      if(remaining <= 0) clearInterval(countdownInterval);
+    }, 1000);
+    await new Promise(r => setTimeout(r, duration));
+    hideOverlay();
+  }
+
+  function createCanvasSnapshot() {
+    const canvas = document.createElement('canvas');
+    canvas.width = previewWrapper.clientWidth * 2;
+    canvas.height = previewWrapper.clientHeight * 2;
+    const ctx = canvas.getContext('2d');
+
+    // Background white/black
+    ctx.fillStyle = darkMode ? '#121212' : '#f9f9f9';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw background blur texts
+    ctx.font = '18px Roboto Mono';
+    ctx.fillStyle = darkMode ? 'rgba(102,102,102,0.15)' : 'rgba(153,153,153,0.15)';
+    ctx.textBaseline = 'top';
+    const linesPerColumn = 10;
+    const columnWidth = canvas.width / 2;
+    const lineHeight = 22;
+    let y = 10;
+    for(let i = 0; i < blurTexts.length; i++) {
+      const text = blurTexts[i];
+      const x = i < linesPerColumn ? 10 : columnWidth + 10;
+      ctx.fillText(text, x, y);
+      if(i === linesPerColumn - 1) y = 10; else y += lineHeight;
+    }
+
+    // Draw main text
+    ctx.font = `bold 80px ${fontSelect.value}`;
+    ctx.fillStyle = colorSelect.value;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(inputText.value.trim() || "Your Text Here", canvas.width / 2, canvas.height / 2);
+
+    return canvas;
+  }
+
+  function downloadPNG() {
+    const canvas = createCanvasSnapshot();
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `paper_text_${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  async function downloadVideo() {
+    showOverlay('Preparing video...', 'Please wait');
+    const canvas = createCanvasSnapshot();
+    const stream = canvas.captureStream(30);
+    const recordedChunks = [];
+    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
+
+    mediaRecorder.ondataavailable = e => {
+      if (e.data.size > 0) recordedChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = e => {
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `paper_text_${Date.now()}.webm`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      hideOverlay();
+    };
+
+    mediaRecorder.start();
+    await new Promise(r => setTimeout(r, 2000));
+    mediaRecorder.stop();
+  }
+
+  function updateButtons(state) {
+    downloadPngBtn.disabled = !state;
+    downloadMp4Btn.disabled = !state;
+  }
+
+  inputText.addEventListener('input', () => {
+    updateCharCount();
+    updateMainText();
+    updateButtons(false);
+  });
+
+  fontSelect.addEventListener('change', () => {
+    updateMainText();
+  });
+
+  colorSelect.addEventListener('change', () => {
+    updateMainText();
+  });
+
+  toggleTheme.addEventListener('click', () => {
+    toggleThemeMode();
+  });
+  toggleTheme.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleThemeMode();
+    }
+  });
+
+  createBtn.addEventListener('click', async () => {
+    if(inputText.value.trim().length === 0) return alert('Please enter some text!');
+    createBtn.disabled = true;
+    await createAnimation(3000);
+    updateMainText();
+    updateButtons(true);
+    createBtn.disabled = false;
+  });
+
+  downloadPngBtn.addEventListener('click', () => {
+    downloadPNG();
+  });
+
+  downloadMp4Btn.addEventListener('click', () => {
+    downloadVideo();
+  });
+
+  // Init
+  setBackgroundTexts();
+  updateCharCount();
+  updateMainText();
+  updateButtons(false);
+
+})();
+</script>
+</body>
+</html>
