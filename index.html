@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Şekilli Yazı Oluşturucu</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0e0e0e;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      background: linear-gradient(to right, #00fff2, #0077ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    input, button {
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
+      margin: 0.5rem 0;
+      border-radius: 10px;
+      border: none;
+      width: 100%;
+      max-width: 500px;
+      box-sizing: border-box;
+    }
+
+    input {
+      background: #1f1f1f;
+      color: #fff;
+      border: 1px solid #333;
+    }
+
+    button {
+      background: linear-gradient(135deg, #00ffc3, #0077ff);
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+    }
+
+    .results {
+      margin-top: 2rem;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .result {
+      background: #1a1a1a;
+      margin: 0.5rem 0;
+      padding: 1rem;
+      border-left: 4px solid #00ffc3;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .styled-text {
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .copy-btn {
+      margin-left: 1rem;
+      background: #00ffc3;
+      color: #000;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      border: none;
+    }
+
+    .popup {
+      position: fixed;
+      bottom: 20px;
+      background: #00ffc3;
+      color: #000;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      animation: fadeOut 2s ease forwards;
+      z-index: 9999;
+    }
+
+    @keyframes fadeOut {
+      0% {opacity: 1;}
+      80% {opacity: 1;}
+      100% {opacity: 0;}
+    }
+
+    @media (max-width: 600px) {
+      .result {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .copy-btn {
+        margin: 0.5rem 0 0 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>✨ Şekilli Yazı Oluşturucu</h1>
+  <input type="text" id="userInput" placeholder="Yazını buraya gir..." />
+  <button onclick="generate()">🚀 Oluştur</button>
+
+  <div class="results" id="results"></div>
+
+  <script>
+    const styles = [
+      s => s.toUpperCase(),
+      s => s.toLowerCase(),
+      s => [...s].join(' '),
+      s => [...s].reverse().join(''),
+      s => [...s].map(c => c + '✨').join(''),
+      s => [...s].map(c => c + '💎').join(''),
+      s => [...s].map(c => c + '🔥').join(''),
+      s => `『 ${s} 』`,
+      s => `×º°”˜${s}˜”°º×`,
+      s => `⫷ ${s} ⫸`,
+      s => `♛ ${s} ♛`,
+      s => `➳ ${s} ➳`,
+      s => `☾ ${s} ☽`,
+      s => `꧁༒☬ ${s} ☬༒꧂`,
+      s => `🆃🅴🆇🆃: ${s}`,
+      s => s.replace(/[A-Za-z]/g, c => String.fromCodePoint(0x1D400 + c.toUpperCase().charCodeAt(0) - 65)), // Bold
+      s => s.replace(/[A-Za-z]/g, c => String.fromCodePoint(0x1D468 + c.toUpperCase().charCodeAt(0) - 65)), // Italic
+      s => s.replace(/[A-Za-z]/g, c => String.fromCodePoint(0x1D56C + c.toUpperCase().charCodeAt(0) - 65)), // Gothic
+      s => s.replace(/[A-Za-z]/g, c => String.fromCodePoint(0x1D538 + c.toUpperCase().charCodeAt(0) - 65)), // Double-struck
+      s => s.replace(/[A-Za-z]/g, c => String.fromCodePoint(0x1D5A0 + c.toUpperCase().charCodeAt(0) - 65)), // Sans-serif
+      s => s.replace(/[A-Za-z]/g, c => String.fromCodePoint(0x1D670 + c.toUpperCase().charCodeAt(0) - 65)), // Monospace
+      s => s.split('').map(c => c + '🌈').join(''),
+      s => s.split('').map(c => c + '🖤').join(''),
+      s => s + ' 👑🔥',
+      s => s + ' ❤️‍🔥💯',
+      s => s + ' 🐉🔮',
+      s => '⚡' + [...s].join('⚡') + '⚡',
+      s => '『✦ ' + s + ' ✦』',
+      s => '🕯️ ' + s + ' 🕯️',
+      s => '⛧ ' + s + ' ⛧',
+      s => '🪬 ' + s + ' 🪬',
+      s => 'ꞨꞨ ' + s + ' ꞨꞨ',
+      s => s.replace(/./g, c => '🅰️'),
+      s => s.replace(/./g, c => c + '🌀'),
+      s => s.replace(/./g, c => '🖤'),
+      s => s.replace(/./g, c => c + '⭐'),
+      s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "") + "🔥"
+    ];
+
+    function generate() {
+      const input = document.getElementById('userInput').value.trim();
+      const results = document.getElementById('results');
+      results.innerHTML = '';
+
+      if (!input) return;
+
+      styles.forEach(fn => {
+        let styled;
+        try {
+          styled = fn(input);
+        } catch (e) {
+          styled = input;
+        }
+
+        const div = document.createElement('div');
+        div.className = 'result';
+        div.innerHTML = `
+          <div class="styled-text">${styled}</div>
+          <button class="copy-btn" onclick="copyToClipboard(\`${styled}\`)">Kopyala</button>
+        `;
+        results.appendChild(div);
+      });
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const popup = document.createElement('div');
+        popup.className = 'popup';
+        popup.textContent = "Kopyalandı!";
+        document.body.appendChild(popup);
+        setTimeout(() => popup.remove(), 2000);
+      });
+    }
+  </script>
+</body>
+</html>
