@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ultimate Newspaper Text Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Roboto+Slab:wght@400;900&display=swap');
+  :root {
+    --light-bg: #faf5eb; --light-text: #111;
+    --dark-bg: #121212; --dark-text: #eee;
+  }
+  body { margin:0; padding:20px; background:var(--light-bg); color:var(--light-text);
+    font-family:'Playfair Display', serif; transition: .3s; text-align:center; }
+  body.dark { background:var(--dark-bg); color:var(--dark-text); }
+  h1 { font-size:2rem; margin-bottom:20px; }
+  #controls { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:20px; }
+  input, select, button { padding:10px; font-size:1rem; border-radius:8px; border:2px solid #888; }
+  button { background:#555; color:#fff; cursor:pointer; }
+  button:hover { background:#333; }
+  canvas { display:block; margin:0 auto; border:2px solid #888; max-width:100%; }
+  .toggle { cursor:pointer; text-decoration:underline; margin-top:10px;}
+  @media(max-width:480px){
+    input{width:140px;}
+    canvas{height:auto;}
+  }
+</style>
+</head>
+<body>
+<h1>Ultimate Newspaper Text Generator</h1>
+<div id="controls">
+  <input id="txt" maxlength="100" placeholder="Enter text (max 100 chars)">
+  <select id="font">
+    <option value="Roboto Slab">Roboto Slab</option>
+    <option value="Playfair Display">Playfair Display</option>
+    <option value="Courier New">Courier New</option>
+    <option value="Arial">Arial</option>
+  </select>
+  <button id="create">Create</button>
+  <button id="savePng">Download PNG</button>
+  <button id="saveMp4">Download Video</button>
+</div>
+<canvas id="canvas" width="800" height="500"></canvas>
+<div class="toggle" id="toggleTheme">Switch Theme</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const papers = [
+  'https://cdn.pixabay.com/photo/2017/08/30/20/12/newspaper-2690259_960_720.jpg',
+  'https://cdn.pixabay.com/photo/2015/12/03/09/59/newspapers-1072540_960_720.jpg',
+  'https://cdn.pixabay.com/photo/2016/10/05/17/52/donald-trump-1715718_960_720.jpg',
+  'https://cdn.pixabay.com/photo/2017/09/26/16/02/newspapers-2783234_960_720.jpg',
+  'https://cdn.pixabay.com/photo/2016/10/06/17/06/newspapers-1723373_960_720.jpg',
+  'https://cdn.pixabay.com/photo/2014/08/05/10/31/newspapers-409617_960_720.jpg'
+];
+let dark = false;
+
+function draw() {
+  const text = txt.value.trim().substring(0,100);
+  const font = fontSelect.value;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = papers[Math.floor(Math.random()*papers.length)];
+  img.onload = () => {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    ctx.font = `bold 36px '${font}'`;
+    ctx.fillStyle = dark ? '#eee' : '#111';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    let y = 60;
+    let lineHeight = 42;
+    text.split(/(.{1,60})(?:\s|$)/g).filter(l=>l.trim()).forEach(line => {
+      ctx.fillText(line.trim(), canvas.width/2, y);
+      y += lineHeight;
+    });
+  };
+}
+
+create.onclick = draw;
+
+savePng.onclick = () => {
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = 'newspaper_text.png';
+  a.click();
+};
+
+saveMp4.onclick = () => {
+  const stream = canvas.captureStream(30);
+  const rec = new MediaRecorder(stream, {mimeType: 'video/webm'});
+  let chunks = [];
+  rec.ondataavailable = e => chunks.push(e.data);
+  rec.onstop = () => {
+    const blob = new Blob(chunks, {type:'video/mp4'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'newspaper_text.mp4';
+    a.click();
+  };
+  rec.start();
+  let frames = 30;
+  let count = 0;
+  const iv = setInterval(() => {
+    draw();
+    count++;
+    if(count >= frames) {
+      clearInterval(iv);
+      rec.stop();
+    }
+  }, 1000/30);
+};
+
+toggleTheme.onclick = () => {
+  dark = !dark;
+  document.body.classList.toggle('dark');
+  draw();
+};
+
+// Init
+txt.value = 'Breaking News!';
+draw();
+</script>
+</body>
+</html>
