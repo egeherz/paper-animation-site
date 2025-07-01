@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ultra Modern Paper Cut Animation on Newspaper</title>
+<style>
+  /* FONT İÇİN GOOGLE FONTS EKLENDİ */
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&family=Source+Code+Pro&family=Playfair+Display&display=swap');
+
+  :root {
+    --yellow-paper-bg: #fef7e0;
+    --yellow-paper-shadow: rgba(201, 167, 75, 0.6);
+    --yellow-border: #c9a74b;
+    --yellow-text: #5a3e00;
+
+    --dark-bg: #121212;
+    --dark-paper-bg: #1f1f1f;
+    --dark-paper-shadow: rgba(255, 255, 255, 0.12);
+    --dark-border: #555555;
+    --dark-text: #d6d6d6;
+  }
+
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Roboto Slab', serif;
+    background: var(--yellow-paper-bg);
+    color: var(--yellow-text);
+    transition: background 0.5s, color 0.5s;
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 30px 15px;
+  }
+
+  body.dark {
+    background: var(--dark-bg);
+    color: var(--dark-text);
+  }
+
+  h1 {
+    margin-bottom: 15px;
+    font-weight: 900;
+    font-size: 2.8rem;
+    text-align: center;
+    user-select: none;
+  }
+
+  #toggleTheme {
+    background: transparent;
+    border: 2px solid currentColor;
+    color: inherit;
+    border-radius: 12px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    user-select: none;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  #toggleTheme:hover {
+    background-color: currentColor;
+    color: var(--yellow-paper-bg);
+  }
+
+  #container {
+    max-width: 600px;
+    width: 100%;
+    position: relative;
+  }
+
+  /* Gazete arka planı için "newspaper" görünümü */
+  #newspaperBackground {
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.02) 4px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.02) 4px
+      ),
+      url('https://cdn.pixabay.com/photo/2017/08/30/20/12/newspaper-2690259_960_720.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    filter: grayscale(0.9) brightness(1.1);
+    z-index: 0;
+    border-radius: 15px;
+    box-shadow: 5px 5px 15px var(--yellow-paper-shadow);
+    transition: filter 0.5s ease;
+  }
+  body.dark #newspaperBackground {
+    filter: grayscale(1) brightness(0.3) contrast(1.4);
+    box-shadow: 0 0 20px var(--dark-paper-shadow);
+  }
+
+  /* Paper animasyon container */
+  #paperContainer {
+    position: relative;
+    z-index: 2;
+    background: var(--yellow-paper-bg);
+    border: 4px solid var(--yellow-border);
+    border-radius: 15px;
+    box-shadow: 8px 8px 25px var(--yellow-paper-shadow);
+    padding: 25px 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.7rem;
+    min-height: 140px;
+    user-select: none;
+    transition: background 0.5s, border-color 0.5s, box-shadow 0.5s;
+  }
+  body.dark #paperContainer {
+    background: var(--dark-paper-bg);
+    border-color: var(--dark-border);
+    box-shadow: 8px 8px 25px var(--dark-paper-shadow);
+  }
+
+  .paper-letter {
+    background: var(--yellow-paper-bg);
+    border: 3.5px solid var(--yellow-border);
+    color: var(--yellow-text);
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 800;
+    font-size: 3.8rem;
+    border-radius: 10px;
+    box-shadow: 6px 6px 16px rgba(0,0,0,0.35);
+    padding: 0.6rem 1.1rem;
+    opacity: 0;
+    transform-origin: center;
+    transform: translateY(35px) rotate(-15deg);
+    animation: floatJitter 1.8s ease forwards;
+    user-select: none;
+    transition: background 0.5s, border-color 0.5s, color 0.5s, box-shadow 0.5s;
+  }
+  body.dark .paper-letter {
+    background: var(--dark-paper-bg);
+    border-color: var(--dark-border);
+    color: var(--dark-text);
+    box-shadow: 6px 6px 16px rgba(255,255,255,0.15);
+  }
+
+  /* Animasyon delay için nth-child */
+  .paper-letter:nth-child(1) { animation-delay: 0s; }
+  .paper-letter:nth-child(2) { animation-delay: 0.3s; }
+  .paper-letter:nth-child(3) { animation-delay: 0.6s; }
+  .paper-letter:nth-child(4) { animation-delay: 0.9s; }
+  .paper-letter:nth-child(5) { animation-delay: 1.2s; }
+  .paper-letter:nth-child(6) { animation-delay: 1.5s; }
+  .paper-letter:nth-child(7) { animation-delay: 1.8s; }
+  .paper-letter:nth-child(8) { animation-delay: 2.1s; }
+  .paper-letter:nth-child(9) { animation-delay: 2.4s; }
+  .paper-letter:nth-child(10) { animation-delay: 2.7s; }
+
+  @keyframes floatJitter {
+    0%, 100% {
+      opacity: 0;
+      transform: translateY(35px) rotate(-15deg);
+    }
+    25% {
+      opacity: 1;
+      transform: translateY(0) rotate(-10deg);
+    }
+    50% {
+      opacity: 1;
+      transform: translateY(10px) rotate(10deg);
+    }
+    75% {
+      opacity: 1;
+      transform: translateY(0) rotate(-5deg);
+    }
+  }
+
+  /* Kullanıcı arayüzü */
+  #controls {
+    margin: 25px auto 0;
+    max-width: 600px;
+    width: 90%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+  }
+  #controls input[type="text"], #controls select {
+    flex: 1 1 250px;
+    font-size: 1.3rem;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    border: 3px solid var(--yellow-border);
+    box-shadow: 3px 3px 8px var(--yellow-paper-shadow);
+    transition: border-color 0.5s, box-shadow 0.5s;
+    outline: none;
+  }
+  body.dark #controls input[type="text"], body.dark #controls select {
+    border-color: var(--dark-border);
+    box-shadow: 3px 3px 8px var(--dark-paper-shadow);
+    background: var(--dark-paper-bg);
+    color: var(--dark-text);
+  }
+
+  #controls button {
+    flex: 1 1 150px;
+    background: var(--yellow-border);
+    border: none;
+    color: var(--yellow-paper-bg);
+    font-weight: 900;
+    font-size: 1.3rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  #controls button:hover {
+    background: #a88b3a;
+  }
+  body.dark #controls button {
+    background: var(--dark-border);
+    color: var(--dark-text);
+  }
+  body.dark #controls button:hover {
+    background: #888;
+  }
+
+  /* Gazete yazıları arka plan */
+  #newspaperText {
+    position: absolute;
+    inset: 20px;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    color: rgba(0,0,0,0.07);
+    line-height: 1.3;
+    user-select: none;
+    pointer-events: none;
+    overflow-wrap: break-word;
+    padding: 10px 25px;
+    white-space: pre-wrap;
+    z-index: 1;
+    filter: blur(0.5px);
+    transition: color 0.5s ease;
+  }
+  body.dark #newspaperText {
+    color: rgba(255,255,255,0.05);
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .paper-letter {
+      font-size: 2.8rem;
+      padding: 0.4rem 0.8rem;
+      border-width: 2.5px;
+    }
+    #controls input[type="text"], #controls select, #controls button {
+      flex: 1 1 100%;
+    }
+    #container {
+      max-width: 100%;
+    }
+  }
+
+</style>
+</head>
+<body>
+
+  <h1>Ultra Modern Paper Cut Animation on Newspaper</h1>
+  <button id="toggleTheme" aria-label="Toggle light and dark theme">Switch to Dark Theme</button>
+
+  <div id="container">
+    <div id="newspaperBackground"></div>
+    <div id="newspaperText"></div>
+    <div id="paperContainer" aria-live="polite" aria-atomic="true" role="region" aria-label="Animated paper cut text"></div>
+  </div>
+
+  <div id="controls" role="form" aria-label="Text input and options">
+    <input type="text" id="userInput" maxlength="10" aria-label="Input text" placeholder="Enter your text here" value="HELLO" />
+    <select id="fontSelect" aria-label="Select font">
+      <option value="'Source Code Pro', monospace" selected>Source Code Pro</option>
+      <option value="'Playfair Display', serif">Playfair Display</option>
+      <option value="'Roboto Slab', serif">Roboto Slab</option>
+      <option value="Arial, sans-serif">Arial</option>
+      <option value="Impact, sans-serif">Impact</option>
+    </select>
+    <button id="createBtn" aria-label="Create animation">Create Animation</button>
+  </div>
+
+  <script>
+    const body = document.body;
+    const toggleThemeBtn = document.getElementById('toggleTheme');
+    const newspaperBg = document.getElementById('newspaperBackground');
+    const newspaperText = document.getElementById('newspaperText');
+    const paperContainer = document.getElementById('paperContainer');
+    const userInput = document.getElementById('userInput');
+    const fontSelect = document.getElementById('fontSelect');
+    const createBtn = document.getElementById('createBtn');
+
+    // İngilizce gazeteden farklı yazılar (haber, makale, alıntı)
+    const newspaperSamples = [
+      `Breaking news: Market sees unexpected rise amid global tensions. Experts analyze the economic impact.`,
+      `In today's edition: Local community organizes charity event to support education for underprivileged children.`,
+      `Sports update: The city's football team clinches a dramatic victory in the championship final.`,
+      `Opinion: Technology's rapid advancement raises questions about privacy and security.`,
+      `Health report: New studies reveal benefits of a balanced diet and regular exercise.`,
+      `Travel tips: Exploring hidden gems in Europe's most charming towns.`,
+      `Science breakthrough: Researchers discover potential cure for rare diseases in groundbreaking trial.`,
+      `Entertainment buzz: Upcoming blockbuster movies generating high anticipation worldwide.`,
+      `Education news: Innovative teaching methods revolutionize classrooms across the country.`,
+      `Finance spotlight: Stock markets react to policy changes, investors stay cautious.`
+    ];
+
+    // Random gazeteden yazı seç
+    function setRandomNewspaperText() {
+      const index = Math.floor(Math.random() * newspaperSamples.length);
+      newspaperText.textContent = newspaperSamples[index];
+    }
+
+    function createAnimation(text, font) {
+      paperContainer.innerHTML = "";
+      text = text.toUpperCase();
+
+      if (text.length === 0) {
+        alert("Please enter some text.");
+        return;
+      }
+      if (text.length > 10) {
+        alert("Maximum 10 characters allowed.");
+        return;
+      }
+
+      for (let i = 0; i < text.length; i++) {
+        const span = document.createElement("span");
+        span.textContent = text[i];
+        span.className = "paper-letter";
+        span.style.animationDelay = `${i * 0.3}s`;
+        span.style.fontFamily = font;
+        paperContainer.appendChild(span);
+      }
+    }
+
+    createBtn.addEventListener('click', () => {
+      createAnimation(userInput.value, fontSelect.value);
+    });
+
+    // Tema değişimi
+    toggleThemeBtn.addEventListener('click', () => {
+      if(body.classList.contains('dark')){
+        body.classList.remove('dark');
+        toggleThemeBtn.textContent = 'Switch to Dark Theme';
+      } else {
+        body.classList.add('dark');
+        toggleThemeBtn.textContent = 'Switch to Light Theme';
+      }
+      setRandomNewspaperText();
+      createAnimation(userInput.value, fontSelect.value);
+    });
+
+    // Sayfa açılışında
+    window.onload = () => {
+      setRandomNewspaperText();
+      createAnimation(userInput.value, fontSelect.value);
+    };
+  </script>
+
+</body>
+</html>
