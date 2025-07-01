@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vertical Paper Text Animator - Ultra Modern</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+  :root {
+    --bg-light: #fefefe;
+    --bg-dark: #121212;
+    --text-light: #222;
+    --text-dark: #f5c518;
+    --accent: #f5c518;
+    --font-family: 'Roboto Mono', monospace;
+    --line-height: 1.3;
+  }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: var(--font-family);
+    background: var(--bg-dark);
+    color: var(--text-dark);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-start;
+    user-select:none;
+  }
+  body.light {
+    background: var(--bg-light);
+    color: var(--text-light);
+  }
+  h1 {
+    margin: 1.5rem 0 0.5rem;
+    font-weight: 700;
+    font-size: 2rem;
+    user-select:none;
+  }
+  #controls {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;
+    margin-bottom: 1rem;
+    width: 90vw; max-width: 900px;
+  }
+  input[type="text"] {
+    flex: 1 1 300px;
+    padding: 0.7rem 1rem;
+    font-size: 1.3rem;
+    border-radius: 8px;
+    border: 2px solid var(--accent);
+    background: transparent;
+    color: inherit;
+    transition: border-color 0.3s ease;
+  }
+  input[type="text"]:focus {
+    outline: none;
+    border-color: #ffaa00;
+    box-shadow: 0 0 8px #ffaa00aa;
+  }
+  button {
+    padding: 0.7rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: var(--accent);
+    color: var(--bg-dark);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    user-select:none;
+  }
+  button:disabled {
+    background: #444;
+    cursor: default;
+    color: #999;
+  }
+  button:hover:not(:disabled) {
+    background: #ffb800;
+    transform: scale(1.05);
+  }
+  #themeToggle {
+    padding: 0.7rem 1rem;
+    background: none;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select:none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  #themeToggle:hover {
+    background: var(--accent);
+    color: var(--bg-dark);
+  }
+
+  #preview {
+    width: 90vw;
+    max-width: 900px;
+    height: 50vh;
+    min-height: 350px;
+    background: var(--bg-light);
+    color: var(--text-light);
+    border-radius: 20px;
+    box-shadow: 0 0 40px 10px rgba(245,197,24,0.3);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    user-select:none;
+  }
+  #backgroundLayer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 80%;
+    font-size: 0.9rem;
+    line-height: var(--line-height);
+    color: var(--accent);
+    opacity: 0.15;
+    user-select:none;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .column span {
+    white-space: nowrap;
+  }
+
+  /* Yavaş dikey kaydırma animasyonu */
+  @keyframes verticalScroll {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-20%); }
+  }
+  #backgroundLayer.animate .column {
+    animation: verticalScroll 20s linear infinite;
+  }
+
+  #mainLayer {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 900;
+    font-size: 2.8rem;
+    color: var(--accent);
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    text-shadow:
+      0 0 8px #ffde4c,
+      0 0 15px #ffde4c;
+    white-space: pre-line;
+    max-width: 80%;
+    text-align: center;
+    user-select:none;
+  }
+
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(18,18,18,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 1rem 2rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    user-select:none;
+    z-index: 9999;
+  }
+  #overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+</style>
+</head>
+<body>
+<h1>Vertical Paper Text Animator</h1>
+<div id="controls">
+  <input id="txt" maxlength="100" placeholder="Enter up to 100 characters" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+  <button id="create">Create</button>
+  <button id="downloadPng" disabled>Download PNG</button>
+  <button id="downloadMp4" disabled>Download MP4</button>
+  <button id="themeToggle" aria-label="Toggle Light/Dark Theme">Light Mode</button>
+</div>
+
+<div id="preview" aria-live="polite" aria-atomic="true" role="region">
+  <div id="backgroundLayer" aria-hidden="true"></div>
+  <div id="mainLayer" aria-live="assertive"></div>
+</div>
+
+<div id="overlay" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+<script>
+(() => {
+  // 20 adet 5 satırlık sütun yazısı (örnek, rastgele gerçek İngilizce metinler)
+  const blurTexts = [
+    ["Breaking news:", "markets rally", "globally now.", "Investors cheer.", "Stocks rise."],
+    ["Scientists unveil", "quantum breakthrough.", "New era begins.", "Research succeeds.", "Future bright."],
+    ["Health experts", "advise balanced", "diet daily.", "Stay hydrated.", "Exercise regularly."],
+    ["Tech trends", "shape our lives.", "Innovate fast.", "AI grows.", "Change ahead."],
+    ["Climate action", "urgent call now.", "Leaders unite.", "Protect Earth.", "Act today."],
+    ["Sports update:", "underdog wins", "final trophy.", "Fans ecstatic.", "History made."],
+    ["SpaceX prepares", "Mars mission launch.", "Crew ready.", "Dreams come true.", "Beyond stars."],
+    ["AI ethics", "debate continues.", "Regulations needed.", "Society adapts.", "Progress slow."],
+    ["Travel rules", "ease with vaccines.", "Tourism opens.", "People hopeful.", "Joy returns."],
+    ["Education reforms", "focus on", "inclusivity.", "Better future.", "Students thrive."],
+    ["Renewable energy", "accelerates fast.", "Clean power.", "Green growth.", "Save planet."],
+    ["Culture returns", "festivals held.", "Joy spreads.", "Art alive.", "Community bonds."],
+    ["Finance tips:", "save for future.", "Invest wisely.", "Plan ahead.", "Grow wealth."],
+    ["Art blends tech", "and tradition.", "New styles.", "Creative boom.", "Inspire all."],
+    ["Smart cities", "urban planning.", "Tech integrates.", "Better life.", "Connected world."],
+    ["Cyber threats", "rise daily.", "Stay secure.", "Protect data.", "Be vigilant."],
+    ["Medical finds", "cancer marker.", "Hope grows.", "New treatments.", "Life saved."],
+    ["Social media", "shapes politics.", "Voices heard.", "Change possible.", "Stay aware."],
+    ["Economy recovers.", "Growth steady.", "Jobs rise.", "Confidence up.", "Future bright."],
+    ["Gaming industry", "reaches heights.", "New worlds.", "Players engage.", "Fun expands."]
+  ];
+
+  const txt     = document.getElementById('txt');
+  const create  = document.getElementById('create');
+  const dlPng   = document.getElementById('downloadPng');
+  const dlMp4   = document.getElementById('downloadMp4');
+  const bgLayer = document.getElementById('backgroundLayer');
+  const mainL   = document.getElementById('mainLayer');
+  const preview = document.getElementById('preview');
+  const overlay = document.getElementById('overlay');
+  const themeToggle = document.getElementById('themeToggle');
+  const body = document.body;
+
+  let canvas, ctx, recorder, chunks;
+
+  // Initialize canvas for export
+  function initCanvas(){
+    if(!canvas){
+      canvas = document.createElement('canvas');
+    }
+    canvas.width = preview.clientWidth * devicePixelRatio;
+    canvas.height = preview.clientHeight * devicePixelRatio;
+    ctx = canvas.getContext('2d');
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+  }
+
+  // Render snapshot for PNG/MP4
+  function renderSnapshot(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // background white paper base
+    ctx.fillStyle = body.classList.contains('light') ? '#fefefe' : '#111';
+    ctx.fillRect(0,0,canvas.width, canvas.height);
+
+    const cols = blurTexts.length;
+    const colWidth = canvas.width / cols;
+    const fontSize = preview.clientHeight / 15;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'center';
+    ctx.font = `600 ${fontSize}px Roboto Mono`;
+    ctx.fillStyle = `rgba(245,197,24,0.15)`;
+
+    // Draw vertical columns background texts
+    for(let c=0; c<cols; c++){
+      for(let r=0; r<5; r++){
+        const x = c*colWidth + colWidth/2;
+        const y = r * fontSize * 1.3 + 10;
+        ctx.fillText(blurTexts[c][r], x, y);
+      }
+    }
+
+    // Draw main user text (split by lines if needed max 5 lines)
+    const mainText = txt.value.trim();
+    if(mainText.length>0){
+      ctx.font = `900 ${fontSize*2.5}px Roboto Mono`;
+      ctx.fillStyle = body.classList.contains('light') ? '#ffaa00' : '#f5c518';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      // split user text to max 5 lines
+      const lines = mainText.match(/.{1,20}/g).slice(0,5);
+      const startY = canvas.height/2 - ((lines.length*fontSize*1.3)/2);
+      for(let i=0; i<lines.length; i++){
+        ctx.fillText(lines[i], canvas.width/2, startY + i*fontSize*1.3 + fontSize*0.7);
+      }
+    }
+  }
+
+  // Show overlay with message for duration
+  function showOverlay(msg, duration=2000){
+    overlay.textContent = msg;
+    overlay.classList.add('visible');
+    setTimeout(() => overlay.classList.remove('visible'), duration);
+  }
+
+  // Create button handler
+  create.addEventListener('click', () => {
+    const text = txt.value.trim();
+    if(text.length === 0){
+      alert('Please enter text!');
+      return;
+    }
+    create.disabled = true;
+    dlPng.disabled = true;
+    dlMp4.disabled = true;
+
+    // Clear background
+    bgLayer.innerHTML = '';
+    mainL.textContent = '';
+    mainL.style.display = 'none';
+    bgLayer.style.display = 'flex';
+    bgLayer.classList.add('animate');
+
+    // Create vertical columns for background texts
+    for(let i=0; i<blurTexts.length; i++){
+      const colDiv = document.createElement('div');
+      colDiv.className = 'column';
+      blurTexts[i].forEach(line => {
+        const sp = document.createElement('span');
+        sp.textContent = line;
+        colDiv.appendChild(sp);
+      });
+      // Slight vertical delay for each col animation
+      colDiv.style.animationDelay = (i*0.3) + 's';
+      bgLayer.appendChild(colDiv);
+    }
+
+    // Show main user text centered
+    mainL.style.display = 'flex';
+    mainL.textContent = text;
+    create.disabled = false;
+    dlPng.disabled = false;
+    dlMp4.disabled = false;
+  });
+
+  // Download PNG handler
+  dlPng.addEventListener('click', () => {
+    initCanvas();
+    renderSnapshot();
+    canvas.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `vertical_paper_text_${Date.now()}.png`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showOverlay('Bizi tercih ettiğiniz için teşekkürler!', 2500);
+    });
+  });
+
+  // Download MP4 handler
+  dlMp4.addEventListener('click', () => {
+    initCanvas();
+    renderSnapshot();
+    const stream = canvas.captureStream(30);
+    recorder = new MediaRecorder(stream, {mimeType: 'video/webm; codecs=vp9'});
+    chunks = [];
+    recorder.ondataavailable = e => {
+      if(e.data.size > 0) chunks.push(e.data);
+    };
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, {type: 'video/webm'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vertical_paper_text_${Date.now()}.webm`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showOverlay('Bizi tercih ettiğiniz için teşekkürler!', 2500);
+    };
+    recorder.start();
+    setTimeout(() => recorder.stop(), 3000);
+  });
+
+  // Theme toggle handler
+  themeToggle.addEventListener('click', () => {
+    if(body.classList.contains('light')){
+      body.classList.remove('light');
+      themeToggle.textContent = 'Light Mode';
+    } else {
+      body.classList.add('light');
+      themeToggle.textContent = 'Dark Mode';
+    }
+  });
+})();
+</script>
+</body>
+</html>
