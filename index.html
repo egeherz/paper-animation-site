@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🔥 ULTIMATE TEXT ANIMATOR 🔥</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #0a0a0a;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Rubik Mono One', monospace;
+      user-select: none;
+    }
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .bg-layer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      gap: 25px;
+      overflow: hidden;
+      z-index: 1;
+      animation: scrollbg 15s linear infinite;
+    }
+    @keyframes scrollbg {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-50%); }
+    }
+    .column {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      flex: 1;
+      color: rgba(255,255,255,0.05);
+      font-size: 0.8rem;
+      filter: blur(2px);
+      text-transform: uppercase;
+      height: 200%;
+    }
+    .column span {
+      padding: 4px 0;
+    }
+    .main-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #c0392b;
+      color: white;
+      padding: 1rem 2rem;
+      font-size: 2.2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 25px #c0392b88;
+      text-transform: lowercase;
+      z-index: 2;
+      white-space: nowrap;
+    }
+    .controls {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    input, button {
+      font-family: 'Rubik Mono One', monospace;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+      font-size: 0.9rem;
+    }
+    input {
+      width: 250px;
+    }
+    button {
+      background: #c0392b;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #e74c3c;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="bg-layer" id="bg"></div>
+  <div class="main-text" id="mainText">playerunknown</div>
+</div>
+
+<div class="controls">
+  <input type="text" id="txt" placeholder="Type your word..." maxlength="30">
+  <button onclick="setText()">GO</button>
+  <button onclick="captureImage()">Download Snapshot</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+  const texts = [
+    "massively multiplayer", "online survival", "PUBG universe", "drop zone locked",
+    "winner winner", "chicken dinner", "supply crates", "last team standing",
+    "energy boost", "armor equipped", "strategic battle", "tactical shooter",
+    "circle shrinking", "island warfare", "battle royale", "zone collapse",
+    "loot and survive", "stealth approach", "vehicle inbound", "sniper ready"
+  ];
+
+  const bg = document.getElementById('bg');
+  const txt = document.getElementById('txt');
+  const mainText = document.getElementById('mainText');
+
+  function generateBackground() {
+    for (let i = 0; i < 20; i++) {
+      const col = document.createElement('div');
+      col.className = 'column';
+      for (let j = 0; j < 20; j++) {
+        const sp = document.createElement('span');
+        sp.textContent = texts[Math.floor(Math.random() * texts.length)];
+        col.appendChild(sp);
+      }
+      bg.appendChild(col);
+    }
+  }
+
+  function setText() {
+    const val = txt.value.trim();
+    if (val) {
+      mainText.textContent = val;
+    }
+  }
+
+  function captureImage() {
+    html2canvas(document.querySelector("#app")).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'text_anim_snapshot.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  }
+
+  txt.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') setText();
+  });
+
+  generateBackground();
+</script>
+</body>
+</html>
